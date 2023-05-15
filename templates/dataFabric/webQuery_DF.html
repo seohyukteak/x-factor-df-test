@@ -1,0 +1,558 @@
+{% extends 'base.html' %} 
+{% block content %} 
+{% load static %}
+
+<div id="content" class="app-content" style="padding: 1rem !important">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xl-10">
+        <div class="row">
+          <div class="query-container">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm w-100px h-35px queryBtn fs-12px fw-700"
+              onclick="query('query_start');"
+              id="query_start"
+            >
+              <i class="fas fa-play pe-2"></i>실행
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm w-100px h-35px queryBtn fs-12px fw-700"
+              onclick="stop();"
+              id="query_stop"
+              style="display: none"
+            >
+              <i class="fas fa-pause pe-2"></i>정지
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm w-100px h-35px queryBtn fs-12px"
+              id="addScript"
+            > 
+            <!-- + Add Script -->
+              + 새창 추가
+            </button>
+            <!--<button type="button" class="btn btn-outline-white btn-sm w-100px h-35px queryBtn-outline fs-12px">QueryGrid</button>-->
+            <!-- BEGIN alert -->
+            <div class="modal" id="alertQueryNot">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">
+                      <i
+                        class="bi bi-exclamation-triangle-fill"
+                        style="color: #ff9f0c"
+                      ></i>
+                      <span>경고 </span>
+                      <i
+                        class="bi bi-exclamation-triangle-fill"
+                        style="color: #ff9f0c"
+                      ></i>
+                    </h5>
+                  </div>
+                  <div class="modal-body">
+                    <p>쿼리 창은 최대 10개까지 만들 수 있습니다.</p>
+                  </div>
+
+                                </div>
+                            </div>
+                            <p style="text-align: center;">클릭 시 자동으로 탭이 닫힙니다.</p>
+                        </div>
+                        <!-- END alert -->
+                        <div class="mt-sm-1">
+                            <ul class="nav nav-tabs change-tabs query-tabs">
+                                <li class="nav-item me-1 w-100px text-center fs-12px">
+                                    <a id="query_Query1" href="#Query1" class="nav-link change-link active queryBtn" data-bs-toggle="tab" style="padding-left: 8px; padding-right: 8px;">쿼리창-1
+                                        <i class="fas fa-times-circle ms-1 delScript" style="z-index:2;"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content query-tabContent">
+                                <div class="query-box tab-pane fade show active" id="Query1">
+                                    <div id = "Progress_Loading"  style="display:none">
+                                        <img src="{% static 'img/common/ajax/1474.png' %}">
+                                    </div>
+                                    <form class="position-relative">
+                                        <textarea style="background-color:transparnet" class="query-input position-absolute" id="query_text" onkeydown="KeyDown(event)" spellcheck='false' placeholder="SELECT시 FROM절에 DB명과 테이블명 사이에 .을 넣어주세요 &#13;&#10;그리고 쿼리문의 끝에 ';'을 넣어주세요"></textarea>
+                                        <div class="show_text"></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-container">
+                        <div class="mt-sm-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <ul class="nav nav-tabs change-tabs result-tabs">
+                                    <!-- <li class="nav-item me-1 w-100px text-center fs-12px"><span class="nav-link change-link active" style="cursor: default;" data-bs-toggle="tab">Result</span></li>
+                                    <i class="bi bi-check-circle-fill" id="success_query">success</i>
+                                    <i class="bi bi-x-circle-fill" id="fail_query"> fail</i> -->
+                                    <li class="nav-item me-1 w-100px text-center fs-12px"><span class="nav-link change-link active" style="cursor: default;" data-bs-toggle="tab">실행결과</span></li>
+                                    <i class="bi bi-check-circle-fill" id="success_query">성공</i>
+                                    <i class="bi bi-x-circle-fill" id="fail_query"> 실패</i>
+                                  </ul>
+                                <div class="queryDownload-container">
+                                    <fieldset disabled id='btn_fieldset'>
+                                    <div class="queryDownload-box d-flex">
+                                        <button id = "btn_excel"type="button" class="btn btn-sm downloadBtn" onclick="sql_export('excel');">
+                                            <i class="fas fa-file-alt file-icon"></i>
+                                            <span class="download-text">Excel</span>
+                                            <i id="excel_icon" class="fas fa-download download-icon"></i>
+                                        </button>
+                                        <button id = "btn_csv" type="button" class="btn btn-sm downloadBtn" onclick="sql_export('csv');">
+                                            <i class="fas fa-file-alt file-icon"></i>
+                                            <span class="download-text">CSV</span>
+                                            <i id="csv_icon" class="fas fa-download download-icon"></i>
+                                        </button>
+                                        <button id = "btn_json" type="button" class="btn btn-sm downloadBtn" onclick="sql_export('json');">
+                                            <i class="fas fa-file-alt file-icon"></i>
+                                            <span class="download-text">JSON</span>
+                                            <i id="json_icon" class="fas fa-download download-icon"></i>
+                                        </button>
+                                    </div>
+                                </fieldset>
+                                </div>
+                            </div>
+                            <div class="tab-content">
+                                <div class="result-box tab-pane fade show active" style="white-space: nowrap" id="result1">
+                                    <div class="DataFabric-scroll" id='webquery_div'>
+                                        <table id="webQuery_table" class="table table-bordered dataFabricTable-sm queryTable fs-12px text-nowrap">
+                                            <thead>
+                                            <tr class="table-dark" id='query_thead'>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="query_tbody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  localStorage.setItem("sid", '{{request.session.sessionid|safe}}', 1);
+  function KeyDown(e) {
+    if (e.ctrlKey) {
+      if (e.key === "Enter") {
+        query();
+      }
+    }
+  }
+
+  function query() {
+    const fieldset = document.getElementById('btn_fieldset');
+    fieldset.disabled = true;
+    // let txtArea2 = document.getElementById("query_text");
+
+    // let txtValue = txtArea.value.trim();
+    let activeTab = document.querySelector(".query-tabs .nav-link.active"); // 활성화된 탭의 nav-link 요소
+    let activeTabId = activeTab.getAttribute("href"); // 활성화된 탭의 ID 가져오기
+    let loading = document.querySelector(`${activeTabId} #Progress_Loading`); // 쿼리별 프로그레스 로딩 아이디
+    let txtArea = document.querySelector(`${activeTabId} .query-input`); // 활성화된 탭 내의 textarea 요소
+    let queryValue = txtArea.value; // textarea의 value값 가져오기
+    /*=====================커서 위치 지정==================*/
+    let selectPos = txtArea.selectionStart;
+    
+    /*=====================문단의 첫문자==================*/
+    let startIndex = queryValue.lastIndexOf(";", selectPos);
+
+    if (startIndex == selectPos){
+      startIndex = queryValue.lastIndexOf(";", selectPos-1);
+    }
+
+    /*=====================문단의 마지막 문자==================*/
+    let lastIndex = queryValue.indexOf(";", selectPos);
+    if(lastIndex == -1){
+      lastIndex = startIndex
+      startIndex = queryValue.lastIndexOf(";", selectPos-3);
+    }
+
+    /*=====================결과값==================*/
+    let resultTxt = queryValue.substring(startIndex+1, lastIndex);
+    setCookie("query", String(resultTxt.trimStart()), 1);
+    var params = {
+      data: resultTxt.trimStart(),
+    };
+    $.ajax({
+      type: "POST",
+      url: "/api/webquery/query_content/",
+      data: params,
+      success: function (res) {
+        document.getElementById("query_stop").style.display = "none";
+        document.getElementById("query_start").style.display = "inline";
+        document.getElementById("query_thead").style.fontSize = "10px";
+        loading.style.display = "none";
+        if (res.status == 200){
+          document.getElementById("success_query").style.display = "inline";
+          document.getElementById("fail_query").style.display = "none";
+        } else {
+          document.getElementById("fail_query").style.display = "inline";
+          document.getElementById("success_query").style.display = "none";
+        }
+        $("#query_tbody").empty();
+        if (res.type == "select" || res.type == 'show' || res.type == 'help') {
+          if (res.status == 200) {
+            fieldset.disabled = false;
+            if ($.fn.DataTable.isDataTable("#webQuery_table")) {
+              $("#webQuery_table").remove();
+              var str = "";
+              str +=
+                '<table id="webQuery_table" class="table table-bordered dataFabricTable-sm queryTable fs-12px text-nowrap">';
+              str += "<thead>";
+              str += `<tr class="table-dark" id='query_thead'>`;
+              str += `</tr>`;
+              str += `</thead>`;
+              str += `<tbody id="query_tbody">`;
+              str += `</tbody>`;
+              str += "</table>";
+              $("#webquery_div").html(str);
+            }
+
+            var str = "";
+            $.each(res.column, function (i) {
+              str +=
+                '<Th style="display: sticky; border:1px solid rgba(255, 255, 255, .2);"' +
+                res.column[i] +
+                ">" +
+                res.column[i] +
+                "</Th>";
+            });
+            $("#query_thead").html(str);
+            handleRenderWebQueryTableData(res.data);
+          } else if (res.status == 400) {
+            $("#query_thead").empty();
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "create") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "insert") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "update") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "delete") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "drop") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "rename") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "alter") {
+          $("#query_thead").empty();
+          if (res.status == 200) {
+            document.getElementById("query_thead").style.fontSize = "15px";
+            var str = "";
+            str += "</br>";
+            $.each(res.data, function (i) {
+              str += res.data[i] + "</br></br>";
+            });
+
+            $("#query_thead").html(str);
+          } else if (res.status == 400) {
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        } else if (res.type == "show") {
+          if (res.status == 200) {
+            var str = "";
+            str +=
+              '<th style="border:1px solid rgba(255, 255, 255, .2);">No.</th>';
+            $.each(res.column, function (i) {
+              str +=
+                '<Th style="display: sticky; border:1px solid rgba(255, 255, 255, .2);"' +
+                res.column[i] +
+                '">' +
+                res.column[i] +
+                "</Th>";
+              });
+              $("#query_thead").append(str);
+              
+              var str = "";
+              $.each(res.data, function (i) {
+              str += "<TR>";
+              str +=
+                '<td class="text-center" style="border:1px solid rgba(255, 255, 255, .2);">' +
+                i +
+                "</td>";
+              for (var j = 0; j < res.data[i].length; j++) {
+                str +=
+                '<td style="border:1px solid rgba(255, 255, 255, .2); padding-left : 5px;">' +
+                  res.data[i][j] +
+                  "</td>";
+                }
+                str += "</TR>";
+              });
+            $("#query_tbody").html(str);
+          } else if (res.status == 400) {
+            $("#query_thead").empty();
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        }else if (res.type == "help") {
+          if (res.status == 200) {
+            var str = "";
+            str +=
+              '<th style="border:1px solid rgba(255, 255, 255, .2);">No.</th>';
+            $.each(res.column, function (i) {
+              str +=
+                '<Th style="display: sticky; border:1px solid rgba(255, 255, 255, .2);"' +
+                res.column[i] +
+                '">' +
+                res.column[i] +
+                "</Th>";
+              });
+              $("#query_thead").append(str);
+              
+              var str = "";
+              $.each(res.data, function (i) {
+              str += "<TR>";
+              str +=
+                '<td class="text-center" style="border:1px solid rgba(255, 255, 255, .2);">' +
+                i +
+                "</td>";
+              for (var j = 0; j < res.data[i].length; j++) {
+                str +=
+                '<td style="border:1px solid rgba(255, 255, 255, .2); padding-left : 5px;">' +
+                  res.data[i][j] +
+                  "</td>";
+                }
+                str += "</TR>";
+              });
+            $("#query_tbody").html(str);
+          } else if (res.status == 400) {
+            $("#query_thead").empty();
+            var str = "";
+            str += res.data + "</br>";
+            $("#query_thead").html(str);
+          }
+        }
+      },
+      beforeSend: function () {
+        document.getElementById("query_stop").style.display = "inline";
+        document.getElementById("query_start").style.display = "none";
+        if ($.fn.DataTable.isDataTable('#webQuery_table')) {
+            $("#webQuery_table").remove()
+            var str = "";
+              str += '<table id="webQuery_table" class="table table-bordered dataFabricTable-sm queryTable fs-12px text-nowrap">'
+              str += '<thead>'
+              str += `<tr class="table-dark" id='query_thead'>`
+              str += `</tr>`
+              str += `</thead>`
+              str += `<tbody id="query_tbody">`
+              str += `</tbody>`
+              str += '</table>'
+            $("#webquery_div").html(str);
+        };
+        loading.style.display = "inline";
+      },
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">쿼리</b> 에러', // Alert 제목
+            text:'쿼리를 제대로 입력해주세요', // Alert 내용
+            confirmButtonText : '확인'
+          });
+        document.getElementById("query_stop").style.display = "none";
+        document.getElementById("query_start").style.display = "inline";
+        loading.style.display = "none";
+        document.getElementById("fail_query").style.display = "inline";
+        document.getElementById("success_query").style.display = "none";
+        $("#webQuery_table").remove()
+        var str = "";
+        str += '<table id="webQuery_table" class="table table-bordered dataFabricTable-sm queryTable fs-12px text-nowrap">'
+        str += '<thead>'
+        str += `<tr class="table-dark" id='query_thead'>`
+        str += "<td> 쿼리를 제대로 입력해주세요 </td>";
+        str += `</tr>`
+        str += `</thead>`
+        str += `<tbody id="query_tbody">`
+        str += `</tbody>`
+        str += '</table>'
+
+        $("#webquery_div").html(str);
+      },
+    });
+  }
+  function sql_export(f) {
+    var type = f;
+    var sql = getCookie("query");
+    if (sql.trim().toLowerCase().startsWith("select")){
+      if (sql.trim().toLowerCase().includes("where")){
+        var title = sql.split("from")[1].split("where")[0].replace(".", "_").trim()
+      }else{
+        var title = sql.split("from")[1].replace(".", "_").trim()
+      }
+    }
+    var params = {
+      type: type,
+      sql: sql,
+    };
+    $.ajax({
+      type: "GET",
+      url: "/api/webquery/export_api/",
+      data: params,
+      success: function (res) {
+        if (type == 'excel'){
+            var arraybuffer = base64ToArrayBuffer(res.file);
+            var data = new Uint8Array(arraybuffer);
+            var workbook = XLSX.read(data, { type: 'array' });
+            
+            // 다운로드
+            XLSX.writeFile(workbook, title+'.xlsx');
+            $('#excel_icon').attr('class', 'fas fa-download download-icon');
+            document.getElementById("btn_excel").style.backgroundColor = "transparent";
+            $("#btn_json").attr("disabled", false);
+            $("#btn_csv").attr("disabled", false);
+        }else if(type == 'csv'){
+            var blob = new Blob([res.file], { type: 'text/csv;charset=utf-8;' })
+            downloadFile(blob, title);
+            $('#csv_icon').attr('class', 'fas fa-download download-icon');
+            document.getElementById("btn_csv").style.backgroundColor = "transparent";
+            $("#btn_json").attr("disabled", false);
+            $("#btn_excel").attr("disabled", false);
+        }else if(type == 'json'){
+            const filename = title + '.json';
+            const jsonBlob = new Blob([JSON.stringify(res.file)], { type: 'application/json' });
+            downloadFile(jsonBlob, filename);
+            $('#json_icon').attr('class', 'fas fa-download download-icon');
+            document.getElementById("btn_json").style.backgroundColor = "transparent";
+            $("#btn_csv").attr("disabled", false);
+            $("#btn_excel").attr("disabled", false);
+        }
+      },
+      beforeSend: function () {
+        if (type == 'excel'){
+            $('#excel_icon').attr('class', 'fas fa-spinner fa-pulse');
+            document.getElementById("btn_excel").style.backgroundColor = "var(--bs-warning)";
+            $("#btn_csv").attr("disabled", true);
+            $("#btn_json").attr("disabled", true);
+        }else if(type == 'csv'){
+            $('#csv_icon').attr('class', 'fas fa-spinner fa-pulse');
+            document.getElementById("btn_csv").style.backgroundColor = "var(--bs-warning)";
+            $("#btn_excel").attr("disabled", true);
+            $("#btn_json").attr("disabled", true);
+        }else if(type == 'json'){
+            $('#json_icon').attr('class', 'fas fa-spinner fa-pulse');
+            document.getElementById("btn_json").style.backgroundColor = "var(--bs-warning)";
+            $("#btn_csv").attr("disabled", true);
+            $("#btn_excel").attr("disabled", true);
+        }
+      },
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        alert("에러발생");
+      },
+    });
+  }
+
+function downloadFile(blob, filename) {
+  saveAs(blob, filename);
+}
+
+function base64ToArrayBuffer(base64) {
+  var binaryString = window.atob(base64);
+  var binaryLen = binaryString.length;
+  var bytes = new Uint8Array(binaryLen);
+  for (var i = 0; i < binaryLen; i++) {
+      var ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+  }
+  return bytes;
+}
+</script>
+
+
+<!-- END content -->
+{% endblock %}

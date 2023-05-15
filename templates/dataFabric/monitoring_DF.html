@@ -1,0 +1,584 @@
+{% extends 'base.html' %} {% block content %} {% load static %}
+<!-- BEGIN content -->
+
+<div id="content" class="app-content" style="padding: 1rem !important">
+  <div class="container">
+    <div class="row justify-content-center">
+      <!-- BEGIN col-xl-10 -->
+      <div class="col-xl-10">
+        <div class="row">
+          <!-- BEGIN col-xl-6 -->
+          <div class="col-xl-6 mb-3">
+            <div
+              class="d-flex h-30px form-control form-control-lg bg-white bg-opacity-25 mb-1 fs-12px p-0 w-200px text-white align-items-center justify-content-center"
+            >
+              <!-- Database traffic -->
+              데이터베이스 사용량
+            </div>
+            <div
+              class="form-control form-control-lg bg-white bg-opacity-10 h-190px"
+            >
+              <div id="databaseConnectChart" class="mt-n3 mb-n2"></div>
+            </div>
+          </div>
+          <!-- END col-xl-6 -->
+
+          <!-- BEGIN col-xl-6 -->
+          <div class="col-xl-6">
+            <div
+              class="d-flex h-30px form-control form-control-lg bg-white bg-opacity-25 mb-1 fs-12px p-0 w-200px text-white align-items-center justify-content-center"
+            >
+              <!-- User traffic -->
+              유저 사용량
+            </div>
+            <div
+              class="form-control form-control-lg bg-white bg-opacity-10 h-190px"
+            >
+              <div id="UserConnectChart"></div>
+            </div>
+          </div>
+          <!-- END col-xl-6 -->
+
+          <!-- END col-xl-12 -->
+          <div class="col-xl-12">
+            <div
+              class="d-flex h-30px form-control form-control-lg bg-white bg-opacity-25 mb-1 fs-12px p-0 w-200px text-white align-items-center justify-content-center"
+            >
+              <!-- Database CPU traffic -->
+              데이터베이스 CPU 사용량
+            </div>
+            <div
+              class="form-control form-control-lg bg-white bg-opacity-10 h-240px mb-3"
+            >
+              <div id="CpuUsageChart" class="mt-n3 mb-n2"></div>
+            </div>
+          </div>
+          <!-- END col-xl-12 -->
+
+          <!-- END col-xl-12 -->
+          <div class="col-xl-12">
+            <div class="col-xl-12 d-flex">
+              <div
+                class="d-flex h-30px form-control form-control-lg bg-white bg-opacity-25 mb-1 fs-12px p-0 w-200px text-white align-items-center justify-content-center"
+              >
+                <!-- Query History -->
+                쿼리 히스토리
+              </div>
+
+              <div
+                align="right"
+                style="cursor: pointer; margin-left: auto; margin-top: 1%"
+                id="historyRefresh"
+                onclick="historyRefresh()"
+              >
+                <!-- Refresh -->
+                새로고침 <i class="bi bi-arrow-clockwise"></i>
+              </div>
+            </div>
+            <div
+              class="form-control form-control-lg bg-white bg-opacity-10 h-295px"
+              id="historyform"
+            >
+              <!-- BEGIN monitoring-table -->
+              <table
+                id="queryHistoryTable"
+                class="table table-bordered dataFabricTable-sm QueryHistoryTable fs-12px"
+              >
+                <thead>
+                  <tr class="table-dark">
+                    <th></th>
+                    <th>Timestamp</th>
+                    <th>DB Name</th>
+                    <th>Database</th>
+                    <th>Table</th>
+                    <th>User</th>
+                    <th>Query</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody class="link-2">
+                  {% for historydata in history %}
+                  <tr class="hadeari">
+                    <td style="border-left: none; border-right: none">
+                      <i
+                        id="plusbutton{{forloop.counter}}"
+                        class="bi bi-plus-square"
+                        onclick="accordian_all('accord{{forloop.counter}}', {{forloop.counter}}, 'area{{forloop.counter}}','result{{forloop.counter}}');"
+                      ></i>
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <span class="thin"
+                        >{{historydata.commit_time|date:'Y-m-d H:i'}}</span
+                      >
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <span class="thin">{{historydata.dbname}}</span>
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <span class="thin">{{historydata.dbtype}}</span>
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <span class="thin">{{historydata.dbtable}}</span>
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <span class="thin">{{historydata.db_user}}</span>
+                    </td>
+                    <td style="border-left: none; border-right: none">
+                      <i
+                        class="fa-regular fa-clipboard"
+                        onclick="copy_sql({{forloop.counter}})"
+                        id="clipboard"
+                        title="copy"
+                      ></i>
+                      <span class="thin"> &nbsp{{historydata.db_query}} </span>
+                      <input
+                        type="hidden"
+                        value="{{historydata.db_query}}"
+                        id="sql_text{{forloop.counter}}"
+                      />
+                    </td>
+                    <td>
+                      {% if 'success' in historydata.db_result|lower%}
+                      <i
+                        class="fa-solid fa-circle-check"
+                        style="color: green"
+                      ></i>
+                      {% else%}
+                      <i
+                        class="fa-solid fa-circle-xmark"
+                        style="color: red"
+                      ></i>
+                      {% endif %} {{historydata.db_result}}
+                    </td>
+                  </tr>
+                  <tr style="display: None" id="accord{{forloop.counter}}">
+                    <td colspan="8">
+                      <ul class="text-start" style="padding-right: 32px">
+                        <br />
+                        <li>
+                          <h6>TimeStamp</h6>
+                          : {{historydata.commit_time}}
+                        </li>
+                        <li>
+                          <h6>DB Name</h6>
+                          : {{historydata.dbname}}
+                        </li>
+                        <li>
+                          <h6>database</h6>
+                          : {{historydata.dbtype}}
+                        </li>
+                        <li>
+                          <h6>Table</h6>
+                          : {{historydata.dbtable}}
+                        </li>
+                        <li>
+                          <h6>User</h6>
+                          : {{historydata.db_user}}
+                        </li>
+                        <li><h6>Result</h6></li>
+                        <textarea
+                          readonly
+                          id="result{{forloop.counter}}"
+                          ondblclick="resize(this)"
+                          style="
+                            width: 100%;
+                            background-color: transparent;
+                            overflow: hidden;
+                            color: white;
+                            font-size: 1.2em;
+                            resize: none;
+                          "
+                        >{{historydata.db_result}}</textarea>
+                        <li><h6>Query</h6></li>
+                        <textarea
+                          readonly
+                          id="area{{forloop.counter}}"
+                          ondblclick="resize(this)"
+                          style="
+                            width: 100%;
+                            background-color: transparent;
+                            overflow: hidden;
+                            color: white;
+                            font-size: 1.2em;
+                            resize: none;
+                          "
+                        >{{historydata.db_query}}</textarea>
+                      </ul>
+                    </td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                    <td style="display: none" ;></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              <!-- END monitoring-table -->
+            </div>
+          </div>
+          <!-- END col-xl-12 -->
+        </div>
+      </div>
+      <!-- END col-xl-10 -->
+    </div>
+  </div>
+</div>
+<!-- END content -->
+
+<script>
+  var db_traffic = {{db_traffic | safe}};
+  var user_traffic = {{user_traffic | safe}};
+  var cpu_traffic = {{ cpu_traffic | safe}};
+
+  function cpu_traffic_AutoRefresh(){
+    $.ajax({
+              url: "{% url 'cpu_trafficAutoRefresh' %}",
+              method: "POST",
+              async : false,
+
+              success: function (res) {
+                $('#CpuUsageChart').empty()
+                cpu_traffic = [{"data": [{"name": res.systemName, "data": res.cpu_utilization}], "date": res.cpu_utilization_date}]
+
+                // console.log(cpu_traffic)
+
+                var dataMax = Math.max.apply(Math, res.cpu_utilization);
+                if ( dataMax > 5 ) {
+                  dataMax = parseInt(dataMax+1)
+                }else{
+                  dataMax = 5
+                }
+                var date_list = res.cpu_utilization_date;
+                var CpuUsageChartOptions = {
+                  //    series: [{
+                  //      name: "Teradata",
+                  //      data: T_cputraffic_data
+                  //    },
+                  //    {
+                  //      name: "Postgres",
+                  //      data: P_cputraffic_data
+                  //    },
+                  //    {
+                  //      name: "ETC1",
+                  //      data: [41, 62, 20, 50, 72, 69, 82]
+                  //    },
+                  //    {
+                  //      name: "ETC2",
+                  //      data: [85, 98, 69, 47, 87, 92, 100]
+                  //    }
+                  //    ],
+                  chart: {
+                    height: 240,
+                    type: "line",
+                    toolbar: {
+                      show: false,
+                    },
+                    events: {
+                      mounted: (chart) => {
+                        chart.windowResizeHandler();
+                      },
+                    },
+                    zoom: {
+                      enabled: false,
+                    },
+                  },
+                  colors: [
+                    "rgba(" + app.color.themeRgb + ", .95)",
+                    "rgba(" + app.color.themeRgb + ", .70)",
+                    "rgba(" + app.color.themeRgb + ", .45)",
+                    "rgba(" + app.color.themeRgb + ", .20)",
+                  ],
+                  dataLabels: {
+                    enabled: false,
+                  },
+                  legend: {
+                    show: false,
+                  },
+                  stroke: {
+                    curve: "straight",
+                    width: 3,
+                  },
+                  grid: {
+                    row: {
+                      colors: ["rgba(" + app.color.whiteRgb + ", .25)", "transparent"], // takes an array which will be repeated on columns
+                      opacity: 0.5,
+                    },
+                  },
+                  markers: {
+                    size: 1,
+                  },
+                  series: cpu_traffic[0]["data"],
+                  xaxis: {
+                    categories: date_list,
+                    labels: {
+                      show: true,
+                    },
+                    tooltip: {
+                      enabled: false,
+                    },
+                  },
+                  yaxis: {
+                    forceNiceScale: false,
+                    min: 0,
+                    max: dataMax,
+                    labels: {
+                      formatter: (value) => value.toFixed(1) + "%",
+                    },
+                  },
+                  tooltip: {
+                    theme: "dark",
+                    x: {
+                      show: true,
+                    },
+                    y: {
+                      title: {
+                        formatter: function (val) {
+                          return "" + val + " :";
+                        },
+                      },
+                      formatter: (value) => {
+                        return "" + value + "%";
+                      },
+                    },
+                  },
+                };
+                var CpuUsageChart = new ApexCharts(
+                  document.querySelector("#CpuUsageChart"),
+                  CpuUsageChartOptions
+                );
+                CpuUsageChart.render();
+  // END monitoring-LineChart
+
+              },error: function (res){
+                  console.log(res);
+              }
+        });
+  };
+    // 1분마다 자동으로 그래프를 갱신합니다.
+  setInterval(function() {
+      cpu_traffic_AutoRefresh();
+  }, 60000);
+
+  function copy_sql(f){
+      var sql = document.getElementById('sql_text' + f);
+
+      try {
+          navigator.clipboard.writeText(sql.value);
+          console.log('복사된 텍스트 내용: ' + sql.value);
+      } catch (err) {
+          console.log('복사할 수 없음!');
+          console.log(sql);
+      }
+      const Toast = Swal.mixin({
+                  toast: true,
+                  position: 'center-center',
+                  showConfirmButton: false,
+                  timer: 1000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                      toast.addEventListener('mouseenter', Swal.stopTimer)
+                      toast.addEventListener('mouseleave', Swal.resumeTimer)
+                  }
+              })
+
+      Toast.fire({
+          icon: 'success',
+          title: '복사되었습니다.'
+      })
+  };
+
+  function accordian_all(f, c , t, r){
+      const row = document.getElementById(f);
+      const area = document.getElementById(t);
+      const result = document.getElementById(r);
+      if(row.style.display=='none'){
+          $('#plusbutton' + c).attr('class', 'bi bi-dash-square');
+          row.style.display = '';
+          area.style.height = (area.scrollHeight+8)+"px";
+          result.style.height = (result.scrollHeight+8)+"px";
+      }else{
+          $('#plusbutton' + c).attr('class', 'bi bi-plus-square');
+          row.style.display = 'none';
+      }
+  };
+  function resize(obj) {
+      var height = obj.style.height.replace('px','');
+      if(height > 50){
+          obj.style.height = "50px";
+      }else{
+          obj.style.height = (obj.scrollHeight+8)+"px";
+      }
+  };
+      function historyRefresh() {
+          $.ajax({
+              url: "{% url 'refresh' %}",
+              method: "POST",
+              async : false,
+
+              success: function (res) {
+
+                  $('#historyform').empty()
+                  var str = "";
+                  str += `<table `
+                  str += `id="queryHistoryTable"`
+                  str += `class="table table-bordered dataFabricTable-sm QueryHistoryTable fs-12px"`
+                  str += `>`
+                  str += `<thead>`
+                  str += `<tr class="table-dark">`
+                  str += `<th></th>`
+                  str += `<th>Timestamp</th>`
+                  str += `<th>DB Name</th>`
+                  str += `<th>Database</th>`
+                  str += `<th>Table</th>`
+                  str += `<th>User</th>`
+                  str += `<th>Query</th>`
+                  str += `<th>Result</th>`
+                  str += `</tr>`
+                  str += `</thead>`
+                  str += `<tbody class="link-2">`
+                    $.each(res.commit_time, function(i){
+                    str += `<tr class="hadeari">`
+                    // console.log(i+1)
+                    //console.log(res.db_result[i].toLowerCase());
+
+                      str += `<td style="border-left: none; border-right: none">`
+                        str += `<i `
+                        str += `id="plusbutton`+(i+1)+`"`
+                        str += `class="bi bi-plus-square"`
+                        str += `onclick="accordian_all('accord`+(i+1)+`', `+(i+1)+`, 'area`+(i+1)+`','result`+(i+1)+`');"`
+                        str += `></i>`
+                        str += `</td>`
+                        str += `<td style="border-left: none; border-right: none">`
+                          str += `<span class="thin"`
+                          str += `>`+res.commit_time[i]+`</span`
+                          str += `>`
+                          str += `</td>`
+                          str += `<td style="border-left: none; border-right: none">`
+                            str += `<span class="thin">`+res.dbname[i]+`</span>`
+                            str += `</td>`
+                            str += `<td style="border-left: none; border-right: none">`
+                              str += `<span class="thin">`+res.dbtype[i]+`</span>`
+                              str += `</td>`
+                              str += `<td style="border-left: none; border-right: none">`
+                                str += `<span class="thin">`+res.dbtable[i]+`</span>`
+                                str += `</td>`
+                                str += `<td style="border-left: none; border-right: none">`
+                                  str += `<span class="thin">`+res.db_user[i]+`</span>`
+                                  str += `</td>`
+                                  str += `<td style="border-left: none; border-right: none">`
+                                    str += `<i `
+                                    str += `class="fa-regular fa-clipboard"`
+                                    str += `onclick="copy_sql(`+(i+1)+`)"`
+                                    str += `id="clipboard"`
+                                    str += `title="copy"`
+                                    str += `></i>`
+                                    str += `<span class="thin"> &nbsp`+res.db_query[i]+`</span>`
+                                    str += `<input `
+                                    str += `type="hidden" `
+                                    str += `value="`+res.db_query[i]+`" `
+                                    str += `id="sql_text`+(i+1)+`" `
+                                    str += `/>`
+                                    str += `</td>`
+                                    str += `<td>`
+                                    if(res.db_result[i].toLowerCase().includes('success')){
+                                        str += `<i `
+                                        str += `class="fa-solid fa-circle-check"`
+                                        str += `style="color: green"`
+                                        str += `></i> `
+                                    }else{
+                                        str += `<i `
+                                        str += `class="fa-solid fa-circle-xmark"`
+                                        str += `style="color: red"`
+                                        str += `></i> `
+                                    }
+                                      str += res.db_result[i]
+                                      str += `</td>`
+                                      str += `</tr>`
+                                      str += `<tr style="display: None" id="accord`+(i+1)+`">`
+                                        str += `<td colspan="8">`
+                                          str += `<ul class="text-start" style="padding-right: 32px">`
+                                            str += `<br />`
+                                            str += `<li>`
+                                              str += `<h6>TimeStamp</h6>`
+                                              str += `: `+res.commit_time[i]+``
+                                              str += `</li>`
+                                              str += `<li>`
+                                                str += `<h6>DB Name</h6>`
+                                                str += `: `+res.dbname[i]+``
+                                                str += `</li>`
+                                                str += `<li>`
+                                                  str += `<h6>database</h6>`
+                                                  str += `: `+res.dbtype[i]+`}`
+                                                  str += `</li>`
+                                                  str += `<li>`
+                                                    str += `<h6>Table</h6>`
+                                                    str += `: `+res.dbtype[i]+``
+                                                    str += `</li>`
+                                                    str += `<li>`
+                                                      str += `<h6>User</h6>`
+                                                      str += `: `+res.db_user[i]+``
+                                                      str += `</li>`
+                                                      str += `<li><h6>Result</h6></li>`
+                                                      str += `<textarea `
+                                                      str += `readonly`
+                                                      str += `id="result`+(i+1)+`"`
+                                                      str += `ondblclick="resize(this)"`
+                                                      str += `style="`
+                                                      str += `text-align: left;`
+                                                      str += `width: 100%;`
+                                                      str += `background-color: transparent;`
+                                                      str += `overflow: hidden;`
+                                                      str += `color: white;`
+                                                      str += `font-size: 1.2em;`
+                                                      str += `resize: none;`
+                                                      str += `"`
+                                                      str += `>`
+                                                      str += res.db_result[i].trim()
+                                                      str += `</textarea`
+                                                      str += `>`
+                                                      str += `<li><h6>Query</h6></li>`
+                                                      str += `<textarea `
+                                                      str += `readonly`
+                                                      str += `id="area`+(i+1)+`"`
+                                                      str += `ondblclick="resize(this)"`
+                                                      str += `style="`
+                                                      str += `text-align: left;`
+                                                      str += `width: 100%;`
+                                                      str += `background-color: transparent;`
+                                                      str += `overflow: hidden;`
+                                                      str += `color: white;`
+                                                      str += `font-size: 1.2em;`
+                                                      str += `resize: none;`
+                                                      str += `"`
+                                                      str += `>`
+                                                      str += res.db_query[i].trim()
+                                                      str += res.db_result[i].trim()
+                                                      str += `</textarea`
+                                                      str += `>`
+                                                      str += `</ul>`
+                                                      str += `</td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `<td style="display: none" ;></td>`
+                                                      str += `</tr>`
+                  });
+                  str += `</tbody>`
+                  str += `</table>`
+                  $('#historyform').append(str)
+                  handleRenderQueryHistoryTableData();
+              },
+              error: function (res){
+                  console.log(res);
+                  alert("eeee");
+              }
+          });
+      };
+</script>
+{% endblock %}

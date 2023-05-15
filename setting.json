@@ -1,0 +1,32 @@
+{
+  "PROJECT": {
+    "CORE": "Teradata",
+    "LOGIN": "WEB",
+    "CUSTOMER": "Xfactor",
+    "TYPE": "System",
+    "LOG": {
+      "directory": "log/",
+      "fileName": "log_",
+      "fileFormat": ".log"
+    }
+  },
+  "MODULE": {
+    "DataLoadingType": "DB"
+  },
+  "DB": {
+    "DBType": "TERADATA",
+    "DBHost": "192.168.3.41",
+    "DBPort": "1025",
+    "DBName": "xfactor",
+    "DBUser": "dbc",
+    "DBPwd": "dbc",
+    "DBSelectTime": 5,
+    "StatisticsTNM": "statistics_tera",
+    "HistoryTNM": "history_tera",
+    "MenuTNM": "menusetting_tera",
+    "UserTNM": "user_tera"
+  },
+  "KEY" : {
+    "DBKEY" : "XionDp"
+  }
+}

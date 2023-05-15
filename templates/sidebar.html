@@ -1,0 +1,55 @@
+{% load static %}
+
+<div id="sidebar" class="app-sidebar">
+    <!-- BEGIN scrollbar -->
+    <div class="app-sidebar-content ps" data-scrollbar="true" data-height="100%">
+        <!-- BEGIN menu -->
+        {% if menuList %}
+        <div class="menu">
+            <div class="menu-header"></div>
+            {% for menu in menuList %}
+            {% if menu.menuUse == '1' %}
+
+            {% if request.get_full_path|cut:'/' == menu.menuUrl %}
+            <div class="menu-item active">
+            {% else %}
+            <div class="menu-item">
+            {% endif %}
+                <a href="../{{menu.menuUrl}}" class="menu-link">
+                    <!-- 테이플 태그 주석처리 {# #} 색구분을때문에 html 주석으로 한번더 처리 -->
+                    <!-- {# {% if menu.menuName == "Web Query" or menu.menuName == "Navigator" or menu.menuName == "Monitoring" %} #} -->
+                    {% if menu.menuName == "웹 쿼리" %}
+                    <span class="menu-icon"><i class="bi bi-filetype-sql"></i></span>
+                    {% elif menu.menuName == "DB 탐색기"%}
+                    <span class="menu-icon"><i class="bi bi-search"></i></span>
+                    {% elif menu.menuName == "DB 모니터링" %}
+                    <span class="menu-icon"><i class="bi bi-display"></i></span>
+                    <!-- {# {% elif menu.menuName == "Setting" %} #} -->
+                    {% elif menu.menuName == "DB 설정" %}
+                    <span class="menu-icon"><i class="bi bi-gear"></i></span>
+                    {% else %}
+                    {% endif %}
+
+                    <!--{# {% if menu.menuName == "Web Query" or menu.menuName == "Navigator" or menu.menuName == "Monitoring" or menu.menuName == "Setting" %} #} -->
+                    {% if menu.menuName == "웹 쿼리" or menu.menuName == "DB 탐색기" or menu.menuName == "DB 모니터링" or menu.menuName == "DB 설정" %}
+                    <span class="menu-text">{{ menu.menuName }}</span>
+                    {% else %}
+                    {% endif %}
+                </a>
+            </div>
+
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- END menu -->
+        <!-- BEGIN user guide -->
+        <!-- END user guide -->
+    </div>
+</div>
+<!-- BEGIN mobile-sidebar-backdrop -->
+<button class="app-sidebar-mobile-backdrop" data-toggle-target=".app" data-toggle-class="app-sidebar-mobile-toggled"></button>
+<!-- END mobile-sidebar-backdrop -->
+
+
+

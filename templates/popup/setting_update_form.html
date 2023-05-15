@@ -1,0 +1,558 @@
+{% load static %}
+<html lang="ko">
+
+<head>
+  <script src="{% static 'js/jquery/jquery-3.6.0.min.js' %}"></script>
+  <script src="{% static 'js/jquery/ajax.jquery.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+  <title>Setting_Update</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="{% static 'assets/plugins/bootstrap/dist/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'oldStyle.css' %}">
+
+  <!-- ================== BEGIN core-css ================== -->
+  <link rel="stylesheet" type="text/css" href="{% static 'assets/css/vendor.min.css' %}">
+  <link href="{% static 'assets/css/app.min.css' %}" rel="stylesheet" />
+  <!-- ================== END core-css ================== -->
+
+  <!-- ================== BEGIN allFont css ================== -->
+  <link href="{% static 'assets/css/fonts/allFont.css' %}" rel="stylesheet" />
+  <!-- ================== END allFont css ================== -->
+
+  <!-- ================== BEGIN datatable-css ================== -->
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css' %}">
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'assets/plugins/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css' %}">
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'assets/plugins/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css' %}">
+  <!-- ================== END datatable-css ================== -->
+
+  <!-- ================== BEGIN daterangepicker-css ================== -->
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'assets/plugins/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'assets/plugins/bootstrap-daterangepicker/daterangepicker.css' %}">
+  <!-- ================== END daterangepicker-css ================== -->
+
+  <!-- ================== BEGIN swiper-CSS ================== -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/swiper-bundle.min.css' %}">
+  <!-- ================== END swiper-CSS ================== -->
+
+  <!-- ================== BEGIN dashboard-CSS ================== -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+  <!-- ================== END dashboard-CSS ================== -->
+
+  <!-- ================== BEGIN page-css ================== -->
+  <link href="{% static 'assets/plugins/jvectormap-next/jquery-jvectormap.css' %}" rel="stylesheet" />
+  <!-- ================== END page-css ================== -->
+</head>
+
+<body class="theme-orange">
+<div id="app" class="app app-sidebar-collapsed">
+<!-- BEGIN content -->
+<div id="content" class="app-content" style="padding: 1rem !important;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- BEGIN col-xl-10 -->
+            <div class="col-xl-10">
+                <div class="row">
+                    <!-- BEGIN col-xl-12 -->
+                    <div class="col-xl-12 mb-6">
+                        <div class="d-flex h-30px form-control form-control-lg bg-white bg-opacity-25 mb-1 fs-12px p-0 w-200px  text-white align-items-center justify-content-center">
+                            데이터베이스 연결
+                        </div>
+                        <div class="form-control form-control-lg bg-white bg-opacity-10 fs-12px">
+                            <form method="post" onsubmit="return false;">
+                            {% csrf_token %}
+                            <div class="row justify-content-center">
+                                <!-- BEGIN col-xl-9 -->
+                                <div class="col-xl-9">
+                                    <span>Server</span> 
+                                    {% comment %} <span>서버 정보</span> {% endcomment %}
+                                    <div class="mb-4 mt-5px settingConnection h-auto">
+                                        <div class="row justify-content-center">
+                                        <!-- BEGIN col-xl-10 -->
+                                            <div class="col-xl-5 mb-4 d-flex">
+                                                <span>Database :
+                                                {% comment %} <span>데이터베이스 : {% endcomment %}
+                                                    <select class="w-200px h-23px text-left settinginput" name="db" style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                                        {% if update_connect_info.0.db_type == 'teradata' %}
+                                                        <option class="setting-select" value="Teradata" selected>Teradata</option>
+                                                        {% else %}
+                                                        <option class="setting-select" value="Teradata" >Teradata</option>
+                                                        {% endif%}
+                                                        {% if update_connect_info.0.db_type == 'Postgres' %}
+                                                        <option class="setting-select" value="Postgres" selected>Postgres</option>
+                                                        {% else %}
+                                                        <option class="setting-select" value="Postgres">Postgres</option>
+                                                        {% endif%}
+                                                        <option class="setting-select" value="ETC1">ETC1</option>
+                                                        <option class="setting-select" value="ETC2">ETC2</option>
+                                                        <option class="setting-select" value="ETC3">ETC3</option>
+                                                    </select>
+                                                </span>
+                                            </div>
+                                            <!-- BEGIN col-xl-5 -->
+                                            {% if update_connect_info %}
+                                            <div class="col-xl-5 mb-4">
+                                                <span class="ps-3px">DB Name</span> : <input class="w-200px settinginput" name="name" type="text" value="{{ update_connect_info.0.db_name }}" autocomplete='off' style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                            </div>
+                                        <!-- END col-xl-5 -->
+                                        <!-- END col-xl-10 -->
+                                        <!-- BEGIN col-xl-5 -->
+                                            <div class="col-xl-5 ">
+                                                <span class="ps-3px">Host</span> : <br><input class="w-200px settinginput" name="host" id="host"  type="text" value="{{ update_connect_info.0.host }}" autocomplete='off' style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                            </br>
+                                                <span id="heplerHost" style ="display:none;">숫자를 제대로 입력해주세요.</span> 
+                                            </div>
+                                        <!-- END col-xl-5 -->
+                                        <!-- BEGIN col-xl-5 -->
+                                            <div class="col-xl-5">
+                                                <span class="ps-3px">Port</span> : <br><input class="w-200px settinginput" name="port" id="port" type="text" value="{{ update_connect_info.0.port }}" autocomplete='off' style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                            </br>
+                                                <span id="heplerPort" style ="display:none;">숫자를 제대로 입력해주세요.</span>
+                                            </div>
+
+                                        <!-- END col-xl-5 -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- END col-xl-9 -->
+
+                                <!-- BEGIN col-xl-9 -->
+                                <div class="col-xl-9">
+                                    <span>Users</span>
+                                    <div class="mb-4 mt-5px settingConnection h-auto">
+                                        <div class="row justify-content-center">
+                                        <!-- BEGIN col-xl-5 -->
+                                            <div class="col-xl-5">
+                                                <span>ID</span> : <br><input class="w-200px settinginput" name="id" type="text" value="{{ update_connect_info.0.db_user }}" autocomplete='off' style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                            </div>
+                                        <!-- END col-xl-5 -->
+                                        <!-- BEGIN col-xl-5 -->
+                                            <div class="col-xl-5">
+                                                <span>Password</span> : <input class="w-200px settinginput" name="pwd"  type="password"  autocomplete='off' style="background:white; color:black; opacity:0.65; font-weight:700;">
+                                            </div>
+                                        <!-- END col-xl-5 -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- END col-xl-9 -->
+
+                            </div>
+                            <!-- BEGIN col-xl-12 -->
+                            <div class="col-xl-12">
+
+                                <div class="d-flex bd-highlight">
+                                    <div class="me-auto p-1 bd-highlight">
+                                    <button id = deletebtn class="settingBtn w-130px " style="margin-left: 110px" onclick="db_delete('{{ update_connect_info.0.db_name }}', '{{ update_connect_info.0.host }}', '{{ update_connect_info.0.port }}')">
+                                        <i class="fas fa-times-circle ms-1 delScript" style="color: red;"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                    </div>
+                                    <div class="p-1 bd-highlight">
+                                    <button class="settingBtn w-130px"  onclick=TestConnection(this.form) >
+                                        <i class="fas fa-lg fa-fw me-1 fa-plug"></i>
+                                        <span>Test Connection</span>
+                                    </button>
+                                    </div>
+                                    <div class="p-1 bd-highlight">
+                                    <button id = "savebtn" class="w-130px" onclick=DBCON(this.form) disabled>
+                                        <i class="fas fa-lg fa-fw me-1 fa-solid fa-save "></i>
+                                        <span>Save</span>
+                                    </button>
+                                    </div>
+                            </div>
+                        </form>
+                            <!-- END col-xl-10 -->
+                        </div>
+                    </div>
+                    <!-- END col-xl-12 -->
+                </div>
+            </div>
+            <!-- END col-xl-12 -->
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+</body>
+<!-- END content -->
+<script src="{% static 'assets/js/vendor.min.js' %}"></script>
+<script src="{% static 'assets/js/app.min.js' %}"></script>
+<script src="{% static 'assets/js/sweetalert.js' %}"></script>
+<!-- ================== END core-js ================== -->
+
+<!-- ================== BEGIN swiper-js ================== -->
+<script src="{% static 'js/jquery/swiper-bundle.min.js' %}"></script>
+<!-- ================== END swiper-js ================== -->
+<!-- ================== BEGIN TABLE-js ================== -->
+<script src="{% static 'assets/plugins/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/dist/js/ColReorderWithResize.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons/js/buttons.flash.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/moment/min/moment.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script src="{% static 'assets/js/demo/table-plugins.demo.js' %}"></script>
+<!-- ================== END TABLE-js ================== -->
+
+<script src="{% static 'js/common/nav.js' %}"></script>
+<script src="{% static 'js/chart/network.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/d3/d3.v3.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/d3/d3v4.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/d3/queue.v1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/common/topojson.v1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/common/filesaver.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/common/XLSX.js' %}"></script>
+<script>
+    //페이지크기고정
+    window.onfoucus =function(){
+        window.focus();
+        window.resizeTo(1200,600)
+    };
+    window.onresize = (_=>{
+        window.resizeTo(1200,600);
+    })
+let dbtype = [
+    {% for dbinfo in update_connect_info %}
+        {
+            name: "{{ dbinfo.db_type }}",
+        },
+    {% endfor %}
+]
+//let posts = JSON.parse("{{ update_connect_info_js | escapejs }}")
+// 디폴트 값 설정
+var select = document.querySelector('select[name="db"]');
+var options = select.options;
+for (let i = 0; i < options.length; i++) {
+    if (options[i].text.toLowerCase() === dbtype[0].name) {
+        options[i].selected = true;
+    break;
+    }
+}
+function db_delete(dbname, dbhost, dbport){
+        var params = {
+            'dbname' : dbname,
+            'dbhost' : String(dbhost),
+            'dbport' : dbport
+        };
+        $.ajax({
+            type : "POST",
+            url : "/api/setting/setting_delete/",
+            data : params,
+            beforeSend: function() {
+                $('html').css("cursor","wait");
+            },
+            complete: function() {
+                $('html').css("cursor","auto");
+            },
+            success : function(res){
+                Swal.fire({
+                    icon: "success", // Alert 타입
+                    title: '삭제가 완료 되었습니다.', // Alert 제목
+                    text:'2초 후 자동으로 창이 닫힙니다.', // Alert 내용
+                })
+                setTimeout(function() {
+                    opener.parent.location.reload();
+                    window.close();
+                }, 2000);
+            },
+            error : function(XMLHttpRequest, textStatus, errorThrown){
+                alert('Error');
+                    Swal.fire({
+                    icon: "error", // Alert 타입
+                    title: 'delete error.', // Alert 제목
+                    text:'error', // Alert 내용
+                });
+            }
+        });
+}
+// function updatetosave(form){
+//     var dbList = form.elements["db"];
+//     var inputName = form.elements["name"];
+//     var inputHost = form.elements["host"];
+//     var inputPort = form.elements["port"];
+//     var inputID = form.elements["id"];
+//     var inputPWD = form.elements["pwd"];
+    
+//     dbList.removeAttribute("disabled");
+//     inputName.removeAttribute("readonly");
+//     inputHost.removeAttribute("readonly");
+//     inputPort.removeAttribute("readonly");
+//     inputID.removeAttribute("readonly");
+//     inputPWD.removeAttribute("readonly");
+
+//     dbList.style.background = "white";
+//     dbList.style.color = "black";
+//     inputName.style.background = "white";
+//     inputName.style.color = "black";
+//     inputHost.style.background = "white";
+//     inputHost.style.color = "black";
+//     inputPort.style.background = "white";
+//     inputPort.style.color = "black";
+//     inputID.style.background = "white";
+//     inputID.style.color = "black";
+//     inputPWD.style.background = "white";
+//     inputPWD.style.color = "black";
+
+//          // Delete 버튼 숨기기
+//     var deleteBtn = document.getElementById("deletebtn");
+//     deleteBtn.style.display = "none";
+
+//     var span = form.querySelector("button#updatebtn span");
+//     span.textContent = "Save";
+//     var saveBtn = form.querySelector("button#updatebtn");
+//     saveBtn.setAttribute("onclick", "DBCON(this.form)");
+// }
+//host,port키보드이벤트
+$(document).ready(function(){
+    var host = document.getElementById("host");
+    var port = document.getElementById("port");
+    var heplerHost = document.getElementById("heplerHost");
+    var heplerPort = document.getElementById("heplerPort");
+    var regHost = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
+    var regPort = /^([0-9][0-9][0-9][0-9])$/;
+    
+    //host red
+    host.addEventListener("keyup", function(num){ 
+        if(!regHost.test(host.value)){
+            host.style.color = "red";
+            heplerHost.style.display = "inline";
+            host.focus();
+            }else{
+                host.style.color = "black";
+                heplerHost.style.display = "none";
+            };
+            return false;
+        });
+    
+    //port red
+    port.addEventListener("keyup", function(num){ 
+        if(!regPort.test(port.value)){
+            port.style.color = "red";
+            heplerPort.style.display = "inline";
+            port.focus();
+        }else{
+            console.log(port.value);
+            port.style.color = "black";
+            heplerPort.style.display = "none";
+        };
+        return false;
+    });
+
+    });
+function DBCON(form){
+    var db = form.db.value;
+    var name = form.name.value;
+    var host = form.host.value;
+    var port = form.port.value;
+    var id = form.id.value;
+    var pwd = form.pwd.value;
+
+    if(!name){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">DB 이름</b> 에러', // Alert 제목
+            text:'DB이름을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!host){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">호스트</b> 에러', // Alert 제목
+            text:'호스트 번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!port){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">포트</b> 에러', // Alert 제목
+            text:'포트 번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!id){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">사용자 아이디</b> 에러', // Alert 제목
+            text:'아이디을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!pwd){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">비밀번호</b> 에러', // Alert 제목
+            text:'비밀번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        };
+    var params = {
+    'db' : db,
+    'name' : name,
+    'host' : host,
+    'port' : port,
+    'id' : id,
+    'pwd' : pwd
+    };
+    $.ajax({
+        type : "POST",
+        url : "/api/setting/setting_update_api/",
+        data : params,
+        async : false,
+        beforeSend: function() {
+            $('html').css("cursor","wait");
+        },
+        complete: function() {
+            $('html').css("cursor","auto");
+        },
+        success : function(res){
+            if (res.status==200){
+                Swal.fire({
+                    icon: "success", // Alert 타입
+                    title: '저장 되었습니다.', // Alert 제목
+                    text:'2초 후 자동으로 창이 닫힙니다.', // Alert 내용
+                })
+                setTimeout(function() {
+                    opener.parent.location.reload();
+                    window.close();
+                }, 2000);
+            }else if (res.status==400){
+                Swal.fire({
+                    icon: "error", // Alert 타입
+                    title: 'Connection error.', // Alert 제목
+                    text:'올바른 연결정보를 입력하세요', // Alert 내용
+                });
+            }
+
+
+        },
+        error : function(XMLHttpRequest, textStatus, errorThrown){
+            Swal.fire({
+                    icon: "error", // Alert 타입
+                    title: 'Connection error.', // Alert 제목
+                    text:'올바른 연결정보를 입력하세요', // Alert 내용
+                });
+        }
+    });
+}
+
+function TestConnection(form){
+        var db = form.db.value;
+        var name = form.name.value;
+        var host = form.host.value;
+        var port = form.port.value;
+        var id = form.id.value;
+        var pwd = form.pwd.value;
+        let target = document.getElementById('savebtn');
+
+        if(!name){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">DB Name</b> error', // Alert 제목
+            text:'DB이름을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!host){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">host</b> error', // Alert 제목
+            text:'호스트 번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!port){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">port</b> error', // Alert 제목
+            text:'포트 번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!id){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">Users ID</b> error', // Alert 제목
+            text:'아이디을 입력해주세요', // Alert 내용
+            });
+            return false;
+        }else if(!pwd){
+            Swal.fire({
+            icon: "error", // Alert 타입
+            title: '<b style="color:red;">Users Password</b> error', // Alert 제목
+            text:'비밀번호을 입력해주세요', // Alert 내용
+            });
+            return false;
+        };
+
+        var params = {
+            'db' : db,
+            'name' : name,
+            'host' : host,
+            'port' : port,
+            'id' : id,
+            'pwd' : pwd
+        };
+        $.ajax({
+                type : "POST",
+                url : "/api/setting/testconnection_api/",
+                data : params,
+                beforeSend: function() {
+                    $('html').css("cursor","wait");
+                },
+                complete: function() {
+                    $('html').css("cursor","auto");
+                },
+                success : function(res){
+                    if(res.status == 200){
+                        $("#deletebtn").removeClass("settingBtn")
+                        $("#deletebtn").attr("disabled", true)
+                        $("#savebtn").addClass("settingBtn")
+                        $("#savebtn").attr("disabled", false)
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'center-center',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: '연결이 확인 되었습니다. 저장버튼을 눌러 저장 해주세요'
+                        })
+
+                    }else{
+                    Swal.fire({
+                    icon: "error", // Alert 타입
+                    title: '<b style="color:red;">연결</b> 에러', // Alert 제목
+                    text:'올바른 연결정보를 입력하세요', // Alert 내용
+                });
+                    }
+
+                    
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown){
+                    Swal.fire({
+                    icon: "error", // Alert 타입
+                    title: '<b style="color:red;">연결</b> 에러', // Alert 제목
+                    text:'올바른 연결정보를 입력하세요', // Alert 내용
+                });
+                }
+            });
+
+    }
+
+</script>
